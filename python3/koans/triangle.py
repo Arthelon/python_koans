@@ -16,10 +16,25 @@
 # and
 #   about_triangle_project_2.py
 #
+
+
 def triangle(a, b, c):
-    # DELETE 'PASS' AND WRITE THIS CODE
-    pass
+    for side in [a, b, c]:
+        if side < 0:
+            raise TriangleError
+    if a + b <= c or a + c <= b or b + c <= a:
+        raise TriangleError
+    sides = set([a, b, c])
+    identical_sides = len(sides)
+    if identical_sides == 3:
+        return 'scalene'
+    elif identical_sides == 2:
+        return 'isosceles'
+    else:
+        return 'equilateral'
 
 # Error class used in part 2.  No need to change this code.
+
+
 class TriangleError(Exception):
     pass
