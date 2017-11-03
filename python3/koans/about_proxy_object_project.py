@@ -18,17 +18,40 @@
 
 from runner.koan import *
 
+
 class Proxy:
     def __init__(self, target_object):
-        # WRITE CODE HERE
+        self.__dict__['_messages'] = []
+        self.__dict__['_obj'] = target_object
 
-        #initialize '_obj' attribute last. Trust me on this!
-        self._obj = target_object
+    def __add_to_messages(fn):
+        def attr_handler(self, attr_name, *args):
+            self._messages.append(attr_name)
+            return fn(self, attr_name, *args)
+        return attr_handler
 
-    # WRITE CODE HERE
+    def messages(self):
+        return self._messages
 
-# The proxy object should pass the following Koan:
-#
+    def was_called(self, attr_name):
+        return attr_name in self._messages
+
+    def number_of_times_called(self, attr_name):
+        return len(list(filter(lambda attr: attr == attr_name, self._messages)))
+
+    @__add_to_messages
+    def __getattr__(self, attr_name):
+        return getattr(self._obj, attr_name)
+
+    @__add_to_messages
+    def __setattr__(self, attr_name, value):
+        return setattr(self._obj, attr_name, value)
+
+    @__add_to_messages
+    def __delattr__(self, attr_name):
+        return delattr(self._obj, attr_name)
+
+
 class AboutProxyObjectProject(Koan):
     def test_proxy_method_returns_wrapped_object(self):
         # NOTE: The Television class is defined below
@@ -59,7 +82,6 @@ class AboutProxyObjectProject(Koan):
         ex = None
         with self.assertRaises(AttributeError):
             tv.no_such_method()
-
 
     def test_proxy_reports_methods_have_been_called(self):
         tv = Proxy(Television())
@@ -98,6 +120,8 @@ class AboutProxyObjectProject(Koan):
 # changes should be necessary to anything below this comment.
 
 # Example class using in the proxy testing above.
+
+
 class Television:
     def __init__(self):
         self._channel = None
@@ -121,6 +145,8 @@ class Television:
         return self._power == 'on'
 
 # Tests for the Television class.  All of theses tests should pass.
+
+
 class TelevisionTest(Koan):
     def test_it_turns_on(self):
         tv = Television()
